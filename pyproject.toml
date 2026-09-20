@@ -1,0 +1,44 @@
+[project]
+name = "scrapiary"
+version = "0.1.0"
+description = "Turn websites into local RSS feeds"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "fastapi>=0.118.0",
+    "httpx2>=2.12.0",
+    "uvicorn>=0.35.0",
+]
+
+[project.scripts]
+scrapiary = "scrapiary.cli:main"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31.4",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.13.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.basedpyright]
+pythonVersion = "3.14"
+typeCheckingMode = "standard"
+include = ["src", "tests"]
