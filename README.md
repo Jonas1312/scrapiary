@@ -18,6 +18,7 @@ Feeds are available at:
 - <http://127.0.0.1:8765/feeds/dottxt.xml>
 - <http://127.0.0.1:8765/feeds/claude-blog.xml>
 - <http://127.0.0.1:8765/feeds/openai-cookbook.xml>
+- <http://127.0.0.1:8765/feeds/openai-api-changelog.xml>
 - <http://127.0.0.1:8765/feeds/jacob-padilla.xml>
 - <http://127.0.0.1:8765/feeds/langfuse-changelog.xml>
 - <http://127.0.0.1:8765/feeds/parth-sareen.xml>

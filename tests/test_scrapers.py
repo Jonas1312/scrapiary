@@ -15,6 +15,7 @@ from scrapiary.adapters.scrapers.dottxt import DotTxtScraper
 from scrapiary.adapters.scrapers.humanlayer import HumanLayerScraper
 from scrapiary.adapters.scrapers.jacob_padilla import JacobPadillaScraper
 from scrapiary.adapters.scrapers.langfuse import LangfuseChangelogScraper
+from scrapiary.adapters.scrapers.openai_api_changelog import OpenAIAPIChangelogScraper
 from scrapiary.adapters.scrapers.openai_cookbook import OpenAICookbookScraper
 from scrapiary.adapters.scrapers.parth_sareen import ParthSareenScraper
 from scrapiary.adapters.scrapers.sunny_bak import SunnyBakScraper
@@ -119,6 +120,30 @@ async def test_openai_cookbook_scraper_extracts_recipe_list_without_featured_dup
     assert [item.title for item in items] == ["A new recipe", "An older recipe"]
     assert items[0].url == "https://developers.openai.com/cookbook/examples/new-recipe"
     assert items[0].published_at == datetime(2026, 9, 14, tzinfo=UTC)
+
+
+@pytest.mark.asyncio
+async def test_openai_api_changelog_scraper_keeps_entry_content_and_same_day_items() -> None:
+    async with fixture_client("openai_api_changelog.html") as client:
+        items = await OpenAIAPIChangelogScraper(client).scrape()
+
+    assert [item.title for item in items] == [
+        "Feature: Released GPT-6 Sol and GPT-6 Luna.",
+        "Update: Added API key expiration controls.",
+    ]
+    assert [item.published_at for item in items] == [
+        datetime(2026, 9, 22, tzinfo=UTC),
+        datetime(2026, 9, 22, tzinfo=UTC),
+    ]
+    assert items[0].url != items[1].url
+    assert items[0].url.startswith(
+        "https://developers.openai.com/api/docs/changelog#2026-09-22-"
+    )
+    assert items[0].description == (
+        '<p>Released <a href="https://developers.openai.com/api/docs/models/gpt-6-sol">'
+        "GPT-6 Sol</a> and GPT-6 Luna.</p><ul><li>Text and image input</li></ul>"
+    )
+    assert items[0].author == "OpenAI"
 
 
 @pytest.mark.asyncio

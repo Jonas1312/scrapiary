@@ -13,6 +13,7 @@ from scrapiary.adapters.scrapers.dottxt import DotTxtScraper
 from scrapiary.adapters.scrapers.humanlayer import HumanLayerScraper
 from scrapiary.adapters.scrapers.jacob_padilla import JacobPadillaScraper
 from scrapiary.adapters.scrapers.langfuse import LangfuseChangelogScraper
+from scrapiary.adapters.scrapers.openai_api_changelog import OpenAIAPIChangelogScraper
 from scrapiary.adapters.scrapers.openai_cookbook import OpenAICookbookScraper
 from scrapiary.adapters.scrapers.parth_sareen import ParthSareenScraper
 from scrapiary.adapters.scrapers.sunny_bak import SunnyBakScraper
@@ -63,6 +64,12 @@ SCRAPERS = (
         title=OpenAICookbookScraper.title,
         home_url=OpenAICookbookScraper.home_url,
         factory=OpenAICookbookScraper,
+    ),
+    ScraperDefinition(
+        slug=OpenAIAPIChangelogScraper.slug,
+        title=OpenAIAPIChangelogScraper.title,
+        home_url=OpenAIAPIChangelogScraper.home_url,
+        factory=OpenAIAPIChangelogScraper,
     ),
     ScraperDefinition(
         slug=JacobPadillaScraper.slug,

@@ -32,7 +32,7 @@ def test_rss_uses_url_as_guid_and_includes_publication_date(tmp_path) -> None:
         title="A <safe> title",
         url="https://example.com/post?id=1&view=full",
         published_at=when,
-        description="A summary",
+        description='<p>A <a href="https://example.com/details">rich summary</a></p>',
         author="An Author",
     )
     feed = Feed("example", "Example", "https://example.com", (item,), when)
@@ -46,3 +46,6 @@ def test_rss_uses_url_as_guid_and_includes_publication_date(tmp_path) -> None:
     assert rss_item.find("guid").attrib == {"isPermaLink": "true"}  # type: ignore[union-attr]
     assert rss_item.findtext("pubDate") == "Sun, 20 Sep 2026 08:00:00 +0000"
     assert rss_item.findtext("title") == "A <safe> title"
+    assert rss_item.findtext("description") == (
+        '<p>A <a href="https://example.com/details">rich summary</a></p>'
+    )
