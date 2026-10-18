@@ -23,18 +23,26 @@ class UserJotEngineeringScraper:
         soup = BeautifulSoup(response.text, "html.parser")
 
         items: list[FeedItem] = []
-        for link in soup.select("li > a[href^='/blog/']"):
-            title = link.select_one("h2")
+        for link in soup.select("a[href^='/blog/']"):
+            title = link.select_one("h2, h3")
             date = link.select_one("time[datetime]")
-            metadata = link.select_one("div")
-            category = metadata.select_one("span") if metadata else None
-            if category is None or category.get_text(" ", strip=True) != "Engineering":
+            categories = {
+                category.get_text(" ", strip=True) for category in link.select("span")
+            }
+            if "Engineering" not in categories:
                 continue
             if title is None:
                 continue
             if date is None or not isinstance(date.get("datetime"), str):
                 raise RuntimeError("UserJot Engineering: publication date not found")
-            summary = link.select_one("p")
+            summary = next(
+                (
+                    paragraph
+                    for paragraph in link.select("p")
+                    if paragraph.select_one("time") is None
+                ),
+                None,
+            )
             items.append(
                 FeedItem(
                     title=title.get_text(" ", strip=True),

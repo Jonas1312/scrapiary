@@ -102,13 +102,17 @@ async def test_dottxt_scraper_extracts_articles() -> None:
 
 
 @pytest.mark.asyncio
-async def test_claude_blog_scraper_extracts_grid_without_hero_duplicates() -> None:
+async def test_given_resource_cards_when_scraping_claude_then_duplicates_are_removed() -> None:
+    # Given
     async with fixture_client("claude_blog.html") as client:
+        # When
         items = await ClaudeBlogScraper(client).scrape()
 
+    # Then
     assert [item.title for item in items] == ["A new Claude post", "An older Claude post"]
-    assert items[0].url == "https://claude.com/blog/new-post"
+    assert items[0].url == "https://claude.com/resources/articles/new-post"
     assert items[0].published_at == datetime(2026, 9, 17, tzinfo=UTC)
+    assert items[0].description == "The newest Claude article."
     assert items[0].author == "Anthropic"
 
 
@@ -297,37 +301,41 @@ async def test_sunny_bak_scraper_extracts_real_dates() -> None:
 
 
 @pytest.mark.asyncio
-async def test_userjot_scraper_keeps_only_engineering_posts() -> None:
+async def test_given_mixed_categories_when_scraping_userjot_then_only_engineering_is_kept() -> None:
+    # Given
     html = """
-      <ul>
-        <li><a href="/blog/pgvector-deep-dive">
-          <div><span>Engineering</span><time datetime="2025-01-19">Jan 19</time></div>
-          <h2>Deep Dive into Vector Similarity Search</h2><p>A pgvector guide.</p>
-        </a></li>
-        <li><a href="/blog/feedback-board">
-          <div><span>Product</span><time datetime="2026-02-08">Feb 8</time></div>
-          <h2>What Is a Feedback Board?</h2>
-        </a></li>
-      </ul>
+      <a href="/blog/pgvector-deep-dive">
+        <div>Image</div>
+        <p><span>Engineering</span><time datetime="2025-01-19">January 19, 2025</time></p>
+        <h3>Deep Dive into Vector Similarity Search</h3><p>A pgvector guide.</p>
+      </a>
+      <a href="/blog/feedback-board">
+        <div>Image</div>
+        <p><span>Product</span><time datetime="2026-02-08">February 8, 2026</time></p>
+        <h3>What Is a Feedback Board?</h3>
+      </a>
     """
     async with html_client(html) as client:
+        # When
         items = await UserJotEngineeringScraper(client).scrape()
 
+    # Then
     assert [item.title for item in items] == ["Deep Dive into Vector Similarity Search"]
     assert items[0].published_at == datetime(2025, 1, 19, tzinfo=UTC)
+    assert items[0].description == "A pgvector guide."
 
 
 @pytest.mark.asyncio
-async def test_scraper_fails_when_an_article_has_no_publication_date() -> None:
+async def test_given_undated_article_when_scraping_claude_then_date_error_is_raised() -> None:
+    # Given
     html = """
-        <div class="blog_cms_grid">
-          <div class="blog_cms_item">
-            <div class="card_blog_title">Undated article</div>
-            <a data-cta-position="Blog grid" href="/blog/undated">Read more</a>
-          </div>
-        </div>
+        <a href="/resources/articles/undated">
+          <span>Article</span>
+          <h3>Undated article</h3>
+        </a>
     """
     async with html_client(html) as client:
+        # When / Then
         with pytest.raises(RuntimeError, match="publication date not found"):
             await ClaudeBlogScraper(client).scrape()
 

@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 import httpx2
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from scrapiary.adapters.scrapers.common import canonicalize_url
 from scrapiary.domain import FeedItem
@@ -12,7 +13,7 @@ from scrapiary.domain import FeedItem
 class ClaudeBlogScraper:
     slug = "claude-blog"
     title = "Claude Blog"
-    home_url = "https://claude.com/blog"
+    home_url = "https://claude.com/resources/articles"
 
     def __init__(self, client: httpx2.AsyncClient) -> None:
         self._client = client
@@ -23,19 +24,26 @@ class ClaudeBlogScraper:
         soup = BeautifulSoup(response.text, "html.parser")
 
         items: list[FeedItem] = []
-        for card in soup.select(".blog_cms_grid > .blog_cms_item"):
-            link = card.select_one("a[data-cta-position='Blog grid'][href^='/blog/']")
-            title = card.select_one(".card_blog_title")
-            date = card.select_one("[fs-list-field='date']")
-            if link is None or title is None:
+        seen_urls: set[str] = set()
+        for link in soup.select("a[href]:has(h3)"):
+            title = link.select_one("h3")
+            href = link.get("href")
+            if title is None or not isinstance(href, str):
                 continue
-            if date is None:
+            published_at = _find_date(link.select("span"))
+            if published_at is None:
                 raise RuntimeError("Claude Blog: publication date not found")
+            url = canonicalize_url(str(response.url), href)
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            summary = link.select_one("p")
             items.append(
                 FeedItem(
                     title=title.get_text(" ", strip=True),
-                    url=canonicalize_url(str(response.url), str(link["href"])),
-                    published_at=_parse_date(date.get_text(" ", strip=True)),
+                    url=url,
+                    published_at=published_at,
+                    description=summary.get_text(" ", strip=True) if summary else None,
                     author="Anthropic",
                 )
             )
@@ -44,5 +52,12 @@ class ClaudeBlogScraper:
         return items
 
 
-def _parse_date(value: str) -> datetime:
-    return datetime.strptime(value, "%B %d, %Y").replace(tzinfo=UTC)
+def _find_date(metadata: list[Tag]) -> datetime | None:
+    for element in metadata:
+        value = element.get_text(" ", strip=True)
+        for date_format in ("%b %d, %Y", "%B %d, %Y"):
+            try:
+                return datetime.strptime(value, date_format).replace(tzinfo=UTC)
+            except ValueError:
+                continue
+    return None

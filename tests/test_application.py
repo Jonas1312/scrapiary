@@ -160,3 +160,16 @@ async def test_healthcheck_reports_success_failure_and_empty_results() -> None:
         ("broken", HealthCheckStatus.UNHEALTHY, 0, "website unavailable"),
         ("empty", HealthCheckStatus.UNHEALTHY, 0, "scraper returned no articles"),
     ]
+
+
+async def test_given_blank_exception_when_healthchecking_then_exception_type_is_reported() -> None:
+    # Given
+    broken = StubScraper(error=RuntimeError())
+    healthchecker = ScraperHealthChecker([broken])
+
+    # When
+    result = await healthchecker.check("example")
+
+    # Then
+    assert result.status is HealthCheckStatus.UNHEALTHY
+    assert result.error == "RuntimeError"

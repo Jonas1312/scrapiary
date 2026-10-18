@@ -62,7 +62,7 @@ class ScraperHealthChecker:
                 return HealthCheckResult(
                     slug=slug,
                     status=HealthCheckStatus.UNHEALTHY,
-                    error=str(exc),
+                    error=_exception_message(exc),
                 )
 
         return HealthCheckResult(
@@ -129,11 +129,12 @@ class FeedRefresher:
                 self._states.save(slug, state)
             except Exception as exc:
                 logger.exception("Failed to refresh %s", slug)
-                self._record_failure(slug, attempted_at, str(exc))
+                error = _exception_message(exc)
+                self._record_failure(slug, attempted_at, error)
                 return RefreshResult(
                     slug=slug,
                     status=RefreshStatus.FAILED,
-                    error=str(exc),
+                    error=error,
                 )
 
             logger.info("Refreshed %s with %d scraped items", slug, len(items))
@@ -162,3 +163,8 @@ async def _scrape_nonempty(scraper: Scraper) -> list[FeedItem]:
     if not items:
         raise RuntimeError("scraper returned no articles")
     return items
+
+
+def _exception_message(exc: Exception) -> str:
+    message = str(exc).strip()
+    return message if message else type(exc).__name__
