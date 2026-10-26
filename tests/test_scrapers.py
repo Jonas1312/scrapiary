@@ -271,6 +271,27 @@ async def test_anthropic_engineering_enriches_featured_article_date() -> None:
 
 
 @pytest.mark.asyncio
+async def test_anthropic_engineering_extracts_current_research_cards() -> None:
+    html = """
+      <article class="AssetItem-module-scss-module__nUeDbq__article">
+        <time class="AssetItem-module-scss-module__nUeDbq__date">Oct 13, 2026</time>
+        <h3 class="AssetItem-module-scss-module__nUeDbq__metaTitle">
+          <a href="/research/redesigning-source-control">
+            Redesigning source control at Anthropic
+          </a>
+        </h3>
+      </article>
+    """
+    async with html_client(html) as client:
+        items = await AnthropicEngineeringScraper(client).scrape()
+
+    assert [item.title for item in items] == ["Redesigning source control at Anthropic"]
+    assert items[0].url == "https://www.anthropic.com/research/redesigning-source-control"
+    assert items[0].published_at == datetime(2026, 10, 13, tzinfo=UTC)
+    assert items[0].author == "Anthropic"
+
+
+@pytest.mark.asyncio
 async def test_humanlayer_scraper_extracts_metadata_and_summary() -> None:
     html = """
       <a class="block py-2 group" href="/blog/show-me-skill">

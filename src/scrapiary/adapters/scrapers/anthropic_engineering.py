@@ -23,13 +23,13 @@ class AnthropicEngineeringScraper:
         soup = BeautifulSoup(response.text, "html.parser")
 
         items: list[FeedItem] = []
-        for article in soup.select("article[class*='ArticleList']"):
-            link = article.select_one("a[href^='/engineering/']")
+        for article in soup.select("article"):
+            link = article.select_one("a[href^='/engineering/'], a[href^='/research/']")
             title = article.select_one("h2, h3")
             if link is None or title is None:
                 continue
             url = canonicalize_url(str(response.url), str(link["href"]))
-            date = article.select_one("[class*='date']")
+            date = article.select_one("time, [class*='date']")
             description = article.select_one("[class*='summary']")
             published_at = (
                 _parse_date(date.get_text(" ", strip=True))
