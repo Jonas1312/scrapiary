@@ -10,7 +10,7 @@ class Settings:
     data_dir: Path = Path("data")
     host: str = "127.0.0.1"
     port: int = 8765
-    refresh_hours: float = 6.0
+    refresh_hours: float = 3.0
     max_items: int = 100
     max_concurrency: int = 4
 
@@ -30,7 +30,7 @@ class Settings:
             data_dir=Path(os.getenv("SCRAPIARY_DATA_DIR", "data")),
             host=os.getenv("SCRAPIARY_HOST", "127.0.0.1"),
             port=int(os.getenv("SCRAPIARY_PORT", "8765")),
-            refresh_hours=float(os.getenv("SCRAPIARY_REFRESH_HOURS", "6")),
+            refresh_hours=float(os.getenv("SCRAPIARY_REFRESH_HOURS", "3")),
             max_items=int(os.getenv("SCRAPIARY_MAX_ITEMS", "100")),
             max_concurrency=int(os.getenv("SCRAPIARY_MAX_CONCURRENCY", "4")),
         )
