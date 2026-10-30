@@ -9,6 +9,7 @@ from scrapiary.adapters.scrapers.abdellatif import AbdellatifScraper
 from scrapiary.adapters.scrapers.anthropic_engineering import AnthropicEngineeringScraper
 from scrapiary.adapters.scrapers.claude_blog import ClaudeBlogScraper
 from scrapiary.adapters.scrapers.claude_cookbook import ClaudeCookbookScraper
+from scrapiary.adapters.scrapers.cursor_blog import CursorBlogScraper
 from scrapiary.adapters.scrapers.dottxt import DotTxtScraper
 from scrapiary.adapters.scrapers.humanlayer import HumanLayerScraper
 from scrapiary.adapters.scrapers.jacob_padilla import JacobPadillaScraper
@@ -58,6 +59,12 @@ SCRAPERS = (
         title=ClaudeBlogScraper.title,
         home_url=ClaudeBlogScraper.home_url,
         factory=ClaudeBlogScraper,
+    ),
+    ScraperDefinition(
+        slug=CursorBlogScraper.slug,
+        title=CursorBlogScraper.title,
+        home_url=CursorBlogScraper.home_url,
+        factory=CursorBlogScraper,
     ),
     ScraperDefinition(
         slug=OpenAICookbookScraper.slug,

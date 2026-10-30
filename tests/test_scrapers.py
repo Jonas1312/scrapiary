@@ -11,6 +11,7 @@ from scrapiary.adapters.scrapers.anthropic_engineering import AnthropicEngineeri
 from scrapiary.adapters.scrapers.claude_blog import ClaudeBlogScraper
 from scrapiary.adapters.scrapers.claude_cookbook import ClaudeCookbookScraper
 from scrapiary.adapters.scrapers.common import canonicalize_url
+from scrapiary.adapters.scrapers.cursor_blog import CursorBlogScraper
 from scrapiary.adapters.scrapers.dottxt import DotTxtScraper
 from scrapiary.adapters.scrapers.humanlayer import HumanLayerScraper
 from scrapiary.adapters.scrapers.jacob_padilla import JacobPadillaScraper
@@ -99,6 +100,21 @@ async def test_dottxt_scraper_extracts_articles() -> None:
     assert items[0].url == "https://blog.dottxt.ai/new-post.html"
     assert items[0].published_at == datetime(2026, 6, 22, tzinfo=UTC)
     assert items[0].author == ".txt team"
+
+
+@pytest.mark.asyncio
+async def test_cursor_blog_scraper_includes_security_notice() -> None:
+    async with fixture_client("cursor_blog.html") as client:
+        items = await CursorBlogScraper(client).scrape()
+
+    assert [item.title for item in items] == [
+        "Security notice — malicious version of Anthropic.claude-code (2.1.313) identified "
+        "in the Cursor Extension Marketplace",
+        "Introducing the Agent SDK",
+    ]
+    assert items[0].url == ("https://cursor.com/blog/claude-code-extension-security-notice")
+    assert items[0].published_at == datetime(2026, 10, 29, 12, tzinfo=UTC)
+    assert items[0].author == "Cursor"
 
 
 @pytest.mark.asyncio
